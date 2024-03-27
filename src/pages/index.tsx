@@ -30,21 +30,48 @@ const Shorts: React.FC = () => {
   return (
     <section className="px-4 py-8">
       <h2 className="text-2xl font-bold mb-4">SHORTS</h2>
-      <div className="flex flex-row overflow-x-auto">
-        {videoUrls.slice(0, 6).map((videoUrl, index) => (
+      <div className="video-container">
+        {videoUrls.map((videoUrl, index) => (
           <div
             key={index}
-            className="border rounded-md overflow-hidden mx-2"
-            style={{ height: "400px", width: "250px" }}
+            className="video-wrapper"
             onClick={() => handleVideoClick(index)}
           >
-            <video autoPlay loop muted className="w-full h-full">
+            <video autoPlay loop muted className="video">
               <source src={videoUrl} type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           </div>
         ))}
       </div>
+
+      <style jsx>{`
+        .video-container {
+          display: flex;
+          overflow-x: auto; /* Enable horizontal scrolling */
+          scroll-snap-type: x mandatory; /* Snap scrolling to each video */
+        }
+
+        .video-wrapper {
+          flex: 0 0 auto; /* Prevent videos from growing or shrinking */
+          scroll-snap-align: start; /* Ensure each video starts at the beginning of the viewport */
+          margin-right: 1rem; /* Add spacing between videos */
+        }
+
+        .video {
+          width: 250px;
+          height: 140px;
+          object-fit: cover;
+          cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+          .video {
+            width: 150px; /* Adjust video width for smaller screens */
+            height: 100px; /* Adjust video height for smaller screens */
+          }
+        }
+      `}</style>
     </section>
   );
 };
