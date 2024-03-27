@@ -1,6 +1,7 @@
-"use client";
+"use client"
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import Image from "next/image";
 
 const videoUrls = [
   "https://res.cloudinary.com/dhenxlgm5/video/upload/v1711530824/demo/vid1.mp4",
@@ -23,12 +24,46 @@ const videoUrls = [
 const VideoPage: React.FC = () => {
   const router = useRouter();
   const { videoId } = router.query;
-
   const [currentIndex, setCurrentIndex] = useState(Number(videoId) || 0);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     setCurrentIndex(Number(videoId) || 0);
-  }, [videoId]);
+
+    const handleScroll = (event: WheelEvent) => {
+      if (event.deltaY > 0) {
+        playNextVideo();
+      } else {
+        playPreviousVideo();
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "ArrowDown" || event.key === "ArrowRight") {
+        playNextVideo();
+      } else if (event.key === "ArrowUp" || event.key === "ArrowLeft") {
+        playPreviousVideo();
+      }
+    };
+
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 600);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    if (isMobile) {
+      window.addEventListener("wheel", handleScroll);
+      window.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("wheel", handleScroll);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [videoId, isMobile]);
 
   const playPreviousVideo = () => {
     const newIndex = (currentIndex - 1 + videoUrls.length) % videoUrls.length;
@@ -50,6 +85,7 @@ const VideoPage: React.FC = () => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
+        position: "relative", // Needed for absolute positioning of heart button container
       }}
     >
       <div
@@ -83,6 +119,34 @@ const VideoPage: React.FC = () => {
             <source src={videoUrls[currentIndex]} type="video/mp4" />
             Your browser does not support the video tag.
           </video>
+          {!isMobile && (
+            <div
+              style={{
+                position: "absolute",
+                bottom: "150px",
+                right: "10px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              <button className="text-3xl font-bold">&#9825;</button>
+              <Image
+                src="/comment.png"
+                alt="comment"
+                width={20}
+                height={20}
+                className="mt-7"
+              />
+              <Image
+                src="/share.png"
+                alt="comment"
+                width={20}
+                height={20}
+                className="mt-7"
+              />
+            </div>
+          )}
         </div>
       </div>
       <div
@@ -95,12 +159,16 @@ const VideoPage: React.FC = () => {
           alignItems: "center",
         }}
       >
-        <button className="text-3xl font-bold" onClick={playPreviousVideo}>
-          &#8593;
-        </button>
-        <button className="text-3xl font-bold" onClick={playNextVideo}>
-          &#8595;
-        </button>
+        {!isMobile && (
+          <>
+            <button className="text-3xl font-bold" onClick={playPreviousVideo}>
+              &#8593;
+            </button>
+            <button className="text-3xl font-bold" onClick={playNextVideo}>
+              &#8595;
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
