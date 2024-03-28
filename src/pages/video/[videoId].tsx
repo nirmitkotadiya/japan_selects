@@ -30,20 +30,18 @@ const VideoPage: React.FC = () => {
   useEffect(() => {
     setCurrentIndex(Number(videoId) || 0);
 
-    const handleScroll = (event: WheelEvent) => {
-      if (event.deltaY > 0) {
-        playNextVideo();
-      } else {
-        playPreviousVideo();
-      }
-    };
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "ArrowDown" || event.key === "ArrowRight") {
-        playNextVideo();
-      } else if (event.key === "ArrowUp" || event.key === "ArrowLeft") {
-        playPreviousVideo();
-      }
+    const handleTouchStart = (event: TouchEvent) => {
+      const startY = event.touches[0].clientY;
+      const handleTouchEnd = (event: TouchEvent) => {
+        const endY = event.changedTouches[0].clientY;
+        if (endY < startY) {
+          playNextVideo();
+        } else if (endY > startY) {
+          playPreviousVideo();
+        }
+        document.removeEventListener("touchend", handleTouchEnd);
+      };
+      document.addEventListener("touchend", handleTouchEnd);
     };
 
     const handleResize = () => {
@@ -54,14 +52,12 @@ const VideoPage: React.FC = () => {
     window.addEventListener("resize", handleResize);
 
     if (isMobile) {
-      window.addEventListener("wheel", handleScroll);
-      window.addEventListener("keydown", handleKeyDown);
+      window.addEventListener("touchstart", handleTouchStart);
     }
 
     return () => {
       window.removeEventListener("resize", handleResize);
-      window.removeEventListener("wheel", handleScroll);
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("touchstart", handleTouchStart);
     };
   }, [videoId, isMobile]);
 
@@ -119,7 +115,7 @@ const VideoPage: React.FC = () => {
             <source src={videoUrls[currentIndex]} type="video/mp4" />
             Your browser does not support the video tag.
           </video>
-          {(isMobile || currentIndex % 2 === 0) && ( // Show share button conditionally based on mobile view or even index of video
+          {(isMobile || currentIndex % 2 === 0) && (
             <div
               style={{
                 position: "absolute",
