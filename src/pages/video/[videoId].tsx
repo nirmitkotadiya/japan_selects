@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Image from "next/image";
@@ -119,7 +119,7 @@ const VideoPage: React.FC = () => {
             <source src={videoUrls[currentIndex]} type="video/mp4" />
             Your browser does not support the video tag.
           </video>
-          {!isMobile && (
+          {(isMobile || currentIndex % 2 === 0) && ( // Show share button conditionally based on mobile view or even index of video
             <div
               style={{
                 position: "absolute",
